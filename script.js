@@ -28,6 +28,44 @@ let conversationContext = {
   fullConversationSummary: "",
 };
 
+/* Save selected products to localStorage */
+function saveSelectedProductsToStorage() {
+  try {
+    // Save the selected products array to localStorage
+    localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
+  } catch (error) {
+    console.error("Error saving products to localStorage:", error);
+  }
+}
+
+/* Load selected products from localStorage */
+function loadSelectedProductsFromStorage() {
+  try {
+    // Get the saved products from localStorage
+    const savedProducts = localStorage.getItem("selectedProducts");
+
+    // If there are saved products, parse them and update the array
+    if (savedProducts) {
+      selectedProducts = JSON.parse(savedProducts);
+      // Update the display to show the loaded products
+      updateSelectedProductsList();
+    }
+  } catch (error) {
+    console.error("Error loading products from localStorage:", error);
+    // If there's an error, start with empty array
+    selectedProducts = [];
+  }
+}
+
+/* Clear selected products from localStorage */
+function clearSelectedProductsFromStorage() {
+  try {
+    localStorage.removeItem("selectedProducts");
+  } catch (error) {
+    console.error("Error clearing products from localStorage:", error);
+  }
+}
+
 /* Show initial placeholder until user selects a category */
 productsContainer.innerHTML = `
   <div class="placeholder-message">
@@ -46,6 +84,9 @@ chatWindow.innerHTML = `
     </div>
   </div>
 `;
+
+/* Load selected products from localStorage when page loads */
+loadSelectedProductsFromStorage();
 
 /* Add message to conversation history and display */
 function addMessageToConversation(sender, message, isRoutine = false) {
@@ -707,6 +748,9 @@ async function addProductToSelected(productId) {
     // Add to selected products array
     selectedProducts.push(product);
 
+    // Save to localStorage
+    saveSelectedProductsToStorage();
+
     // Update the selected products display
     updateSelectedProductsList();
 
@@ -731,7 +775,8 @@ function updateSelectedProductsList() {
     return;
   }
 
-  selectedProductsList.innerHTML = selectedProducts
+  // Create the products list HTML
+  const productsHTML = selectedProducts
     .map(
       (product) => `
       <div class="selected-product-item">
@@ -747,6 +792,26 @@ function updateSelectedProductsList() {
     `
     )
     .join("");
+
+  // Add a clear all button at the end
+  const clearButtonHTML = `
+    <div style="text-align: center; margin-top: 15px;">
+      <button onclick="clearAllSelectedProducts()" style="
+        background: var(--primary-red); 
+        color: white; 
+        border: none; 
+        padding: 8px 16px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+      " onmouseover="this.style.backgroundColor='#cc0000'" onmouseout="this.style.backgroundColor='var(--primary-red)'">
+        <i class="fa-solid fa-trash"></i> Clear All Products
+      </button>
+    </div>
+  `;
+
+  selectedProductsList.innerHTML = productsHTML + clearButtonHTML;
 }
 
 /* Remove product from selected list */
@@ -755,6 +820,21 @@ function removeSelectedProduct(productId) {
   selectedProducts = selectedProducts.filter(
     (product) => product.id !== productId
   );
+
+  // Save updated list to localStorage
+  saveSelectedProductsToStorage();
+
+  // Update the display
+  updateSelectedProductsList();
+}
+
+/* Add clear all products function */
+function clearAllSelectedProducts() {
+  // Clear the array
+  selectedProducts = [];
+
+  // Clear from localStorage
+  clearSelectedProductsFromStorage();
 
   // Update the display
   updateSelectedProductsList();
