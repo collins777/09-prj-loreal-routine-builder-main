@@ -31,16 +31,13 @@ function displayProducts(products) {
       <button class="add-product-btn" onclick="addProductToSelected(${product.id})" title="Add to selected products">
         <i class="fa-solid fa-plus"></i>
       </button>
-      <button class="toggle-description-btn" onclick="toggleDescription(${product.id})" title="Show/hide description">
+      <button class="toggle-description-btn" onclick="showDescriptionModal(${product.id})" title="View product description">
         <i class="fa-solid fa-info"></i>
       </button>
       <img src="${product.image}" alt="${product.name}">
       <div class="product-info">
         <h3>${product.name}</h3>
         <p>${product.brand}</p>
-        <div class="product-description" id="description-${product.id}" style="display: none;">
-          <p>${product.description}</p>
-        </div>
       </div>
     </div>
   `
@@ -48,38 +45,73 @@ function displayProducts(products) {
     .join("");
 }
 
-/* Toggle product description visibility */
-function toggleDescription(productId) {
-  // Get the description element for this product
-  const descriptionElement = document.getElementById(
-    `description-${productId}`
-  );
-  const toggleButton = document.querySelector(
-    `[data-product-id="${productId}"] .toggle-description-btn`
-  );
-  const productCard = document.querySelector(
-    `[data-product-id="${productId}"]`
-  );
+/* Show product description in a modal */
+async function showDescriptionModal(productId) {
+  // Get all products to find the selected one
+  const allProducts = await loadProducts();
+  const product = allProducts.find((p) => p.id === productId);
 
-  if (!descriptionElement || !toggleButton || !productCard) return;
+  if (!product) return;
 
-  // Check if description is currently visible
-  const isVisible = descriptionElement.style.display !== "none";
+  // Create modal HTML with full description
+  const modalHTML = `
+    <div class="description-modal" onclick="closeDescriptionModal(event)">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeDescriptionModal()" title="Close description">
+          <i class="fa-solid fa-times"></i>
+        </button>
+        <div class="modal-header">
+          <img src="${product.image}" alt="${product.name}" class="modal-image">
+          <div class="modal-title">
+            <h3>${product.name}</h3>
+            <p class="modal-brand">${product.brand}</p>
+          </div>
+        </div>
+        <div class="modal-body">
+          <h4>Product Description</h4>
+          <p>${product.description}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-add-btn" onclick="addProductToSelected(${product.id}); closeDescriptionModal();">
+            <i class="fa-solid fa-plus"></i> Add to Routine
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 
-  if (isVisible) {
-    // Hide description
-    descriptionElement.style.display = "none";
-    toggleButton.innerHTML = '<i class="fa-solid fa-info"></i>';
-    toggleButton.title = "Show description";
-    productCard.classList.remove("expanded");
-  } else {
-    // Show description
-    descriptionElement.style.display = "block";
-    toggleButton.innerHTML = '<i class="fa-solid fa-info-circle"></i>';
-    toggleButton.title = "Hide description";
-    productCard.classList.add("expanded");
+  // Add modal to page
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+  // Focus on the modal for accessibility
+  document.querySelector(".modal-content").focus();
+
+  // Prevent body scrolling when modal is open
+  document.body.style.overflow = "hidden";
+}
+
+/* Close the description modal */
+function closeDescriptionModal(event) {
+  // Only close if clicking the backdrop or close button
+  if (
+    !event ||
+    event.target.classList.contains("description-modal") ||
+    event.target.closest(".modal-close")
+  ) {
+    const modal = document.querySelector(".description-modal");
+    if (modal) {
+      modal.remove();
+      document.body.style.overflow = "auto"; // Restore body scrolling
+    }
   }
 }
+
+/* Add keyboard support for modal */
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeDescriptionModal();
+  }
+});
 
 /* Add product to selected products when plus button is clicked */
 async function addProductToSelected(productId) {
