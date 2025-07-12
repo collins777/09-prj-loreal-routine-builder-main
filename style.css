@@ -239,7 +239,7 @@ body {
   font-size: 18px;
   background: #000;
   color: #fff;
-  border: 2px solid var(--primary-red);
+
   padding: 12px;
   width: 48px;
   height: 48px;
@@ -247,13 +247,17 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease,
+    transform 0.1s ease;
 }
 
 .chat-form button:hover {
-  background: var(--primary-red);
-  color: #000;
+  color: var(--primary-gold);
   border-color: #000;
+}
+
+.chat-form button:active {
+  transform: translateY(-2px);
 }
 
 .chat-form button:focus {
@@ -337,7 +341,7 @@ body {
 
 .product-card p {
   font-size: 14px;
-  color: #666;
+  color: var(--primary-red);
 }
 
 /* selected products */
@@ -367,16 +371,20 @@ body {
   font-weight: 500;
   color: #fff;
   background: #000;
-  border: 2px solid var(--primary-red);
+
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease,
+    transform 0.1s ease;
 }
 
 .generate-btn:hover {
-  background: var(--primary-red);
-  color: #000;
+  color: var(--primary-gold);
   border-color: #000;
+}
+
+.generate-btn:active {
+  transform: translateY(-2px);
 }
 
 .generate-btn i {
