@@ -4,6 +4,7 @@ const productsContainer = document.getElementById("productsContainer");
 const chatForm = document.getElementById("chatForm");
 const chatWindow = document.getElementById("chatWindow");
 const selectedProductsList = document.getElementById("selectedProductsList");
+const generateRoutineBtn = document.getElementById("generateRoutine");
 
 /* Array to store selected products */
 let selectedProducts = [];
@@ -195,11 +196,202 @@ categoryFilter.addEventListener("change", async (e) => {
   displayProducts(filteredProducts);
 });
 
-/* Chat form submission handler - placeholder for OpenAI integration */
-chatForm.addEventListener("submit", (e) => {
+/* Generate routine using OpenAI based on selected products */
+async function generateRoutineFromProducts() {
+  // Check if user has selected any products
+  if (selectedProducts.length === 0) {
+    chatWindow.innerHTML =
+      '<p style="color: var(--primary-red);">Please select at least one product to generate a routine.</p>';
+    return;
+  }
+
+  // Show loading message
+  chatWindow.innerHTML =
+    '<p>Generating your personalized routine... <i class="fa-solid fa-spinner fa-spin"></i></p>';
+
+  try {
+    // Prepare the products data for OpenAI
+    const productsData = selectedProducts.map((product) => ({
+      name: product.name,
+      brand: product.brand,
+      category: product.category,
+      description: product.description,
+    }));
+
+    // Create the prompt for OpenAI
+    const prompt = `You are a professional beauty and skincare consultant. Based on the following selected products, create a personalized routine with step-by-step instructions.
+
+Selected Products:
+${productsData
+  .map(
+    (product) =>
+      `• ${product.brand} ${product.name} (${product.category}): ${product.description}`
+  )
+  .join("\n")}
+
+Please provide:
+1. A clear morning and/or evening routine
+2. Order of application with timing
+3. How much to use and frequency
+4. Any special tips or warnings
+5. Expected benefits
+
+Format the response in a friendly, easy-to-follow manner with clear steps.`;
+
+    // Make API call to OpenAI
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a professional beauty and skincare consultant who creates personalized routines. Be detailed and helpful.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 1500,
+        temperature: 0.7,
+      }),
+    });
+
+    // Check if the API call was successful
+    if (!response.ok) {
+      throw new Error(
+        `OpenAI API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    // Parse the response
+    const data = await response.json();
+    const routine = data.choices[0].message.content;
+
+    // Display the generated routine in the chat window
+    chatWindow.innerHTML = `
+      <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary-gold);">
+        <h3 style="color: var(--primary-red); margin-bottom: 15px;">
+          <i class="fa-solid fa-sparkles"></i> Your Personalized Routine
+        </h3>
+        <div style="line-height: 1.6; white-space: pre-line;">${routine}</div>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error generating routine:", error);
+    chatWindow.innerHTML = `
+      <p style="color: var(--primary-red);">
+        <i class="fa-solid fa-exclamation-triangle"></i> 
+        Sorry, there was an error generating your routine. Please try again later.
+      </p>
+    `;
+  }
+}
+
+/* Send chat message with selected products context to OpenAI */
+async function sendChatMessage(userMessage) {
+  try {
+    // Create context about selected products for the chat
+    const productsContext =
+      selectedProducts.length > 0
+        ? `\n\nUser's currently selected products: ${selectedProducts
+            .map((p) => `${p.brand} ${p.name} (${p.category})`)
+            .join(", ")}`
+        : "";
+
+    // Create the prompt for OpenAI
+    const systemPrompt = `You are a helpful beauty and skincare advisor. Provide personalized advice about routines, products, and skincare concerns. Be friendly, informative, and professional.${productsContext}`;
+
+    // Make API call to OpenAI for chat
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: userMessage,
+          },
+        ],
+        max_tokens: 800,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `OpenAI API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error("Error in chat:", error);
+    throw error;
+  }
+}
+
+/* Add event listener to generate routine button */
+generateRoutineBtn.addEventListener("click", generateRoutineFromProducts);
+
+/* Chat form submission handler with OpenAI integration */
+chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  chatWindow.innerHTML = "Connect to the OpenAI API for a response!";
+  const userInput = document.getElementById("userInput");
+  const userMessage = userInput.value.trim();
+
+  // Check if user entered a message
+  if (!userMessage) return;
+
+  // Clear input field and show loading
+  userInput.value = "";
+  chatWindow.innerHTML =
+    '<p>Thinking... <i class="fa-solid fa-spinner fa-spin"></i></p>';
+
+  try {
+    // Send message to OpenAI and get response
+    const aiResponse = await sendChatMessage(userMessage);
+
+    // Display the conversation in the chat window
+    chatWindow.innerHTML = `
+      <div style="margin-bottom: 15px; padding: 12px; background: #f9f9f9; border-radius: 6px; border-left: 3px solid var(--primary-gold);">
+        <strong style="color: var(--primary-red);">You:</strong> ${userMessage}
+      </div>
+      <div style="padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid var(--primary-gold);">
+        <strong style="color: var(--primary-red);">
+          <i class="fa-solid fa-robot"></i>L'Oré AI:
+        </strong><br>
+        <div style="margin-top: 8px; line-height: 1.6; white-space: pre-line;">${aiResponse}</div>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error in chat:", error);
+    chatWindow.innerHTML = `
+      <div style="margin-bottom: 15px; padding: 12px; background: #f9f9f9; border-radius: 6px; border-left: 3px solid var(--primary-gold);">
+        <strong style="color: var(--primary-red);">You:</strong> ${userMessage}
+      </div>
+      <p style="color: var(--primary-red); padding: 15px; background: #ffe6e6; border-radius: 6px;">
+        <i class="fa-solid fa-exclamation-triangle"></i> 
+        Sorry, there was an error processing your message. Please try again.
+      </p>
+    `;
+  }
 });
 
 /* Initialize selected products list */
