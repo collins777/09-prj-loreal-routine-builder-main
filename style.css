@@ -1,8 +1,19 @@
 /* —— basic reset —— */
+:root {
+  /* Colors */
+  --primary-red: #ff003b;
+  --primary-gold: #e3a535;
+  --primary-white: #fff;
+  --primary-black: #000;
+
+  /* Font */
+  --font-luxurious: "Playfair Display", serif;
+}
+
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 /* —— body + fonts —— */
@@ -11,11 +22,118 @@ body {
   color: #333;
   display: flex;
   justify-content: center;
+  background: #000; /* Black background */
+}
+
+/* Breathing animation keyframes */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Full-page background with expanding circles */
+.bg-circles {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10000;
+  pointer-events: none;
+  background-color: #000;
+  /* Center the circles using flex */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bg-circles::before,
+.bg-circles::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 3px solid var(--primary-red); /* Red circles */
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.4; /* Same opacity for all circles */
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Largest circle */
+.bg-circles::before {
+  width: 120vw;
+  height: 120vw;
+  animation-delay: 0s; /* Start immediately */
+}
+
+/* Medium circle */
+.bg-circles::after {
+  width: 100vw;
+  height: 100vw;
+  animation-delay: 0.5s; /* Slight delay */
+}
+
+/* Multiple inner circles for a complete look */
+.bg-circles .circle-1,
+.bg-circles .circle-2,
+.bg-circles .circle-3,
+.bg-circles .circle-4,
+.bg-circles .circle-5 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 3px solid var(--primary-red); /* Red circles */
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.4; /* Same opacity for all circles */
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.bg-circles .circle-1 {
+  width: 80vw;
+  height: 80vw;
+  animation-delay: 1s; /* Staggered timing */
+}
+
+.bg-circles .circle-2 {
+  width: 65vw;
+  height: 65vw;
+  animation-delay: 1.5s; /* Staggered timing */
+}
+
+.bg-circles .circle-3 {
+  width: 50vw;
+  height: 50vw;
+  animation-delay: 2s; /* Staggered timing */
+}
+
+.bg-circles .circle-4 {
+  width: 35vw;
+  height: 35vw;
+  animation-delay: 2.5s; /* Staggered timing */
+}
+
+.bg-circles .circle-5 {
+  width: 20vw;
+  height: 20vw;
+  animation-delay: 3s; /* Staggered timing */
 }
 
 .page-wrapper {
   width: 90%;
   max-width: 900px;
+  background: white; /* Ensure content area remains white */
+  border-radius: 8px; /* Optional: add some rounding to the content area */
+  padding: 20px; /* Add some padding inside the content area */
+  margin: 20px 0; /* Add some margin to separate from viewport edges */
 }
 
 /* header */
@@ -32,8 +150,14 @@ body {
 
 .site-title {
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 10px;
+  font-family: var(--font-luxurious);
+}
+
+.plus-sign {
+  color: var(--primary-red);
+  font-weight: 500;
 }
 
 /* category filter */
