@@ -31,15 +31,54 @@ function displayProducts(products) {
       <button class="add-product-btn" onclick="addProductToSelected(${product.id})" title="Add to selected products">
         <i class="fa-solid fa-plus"></i>
       </button>
+      <button class="toggle-description-btn" onclick="toggleDescription(${product.id})" title="Show/hide description">
+        <i class="fa-solid fa-info"></i>
+      </button>
       <img src="${product.image}" alt="${product.name}">
       <div class="product-info">
         <h3>${product.name}</h3>
         <p>${product.brand}</p>
+        <div class="product-description" id="description-${product.id}" style="display: none;">
+          <p>${product.description}</p>
+        </div>
       </div>
     </div>
   `
     )
     .join("");
+}
+
+/* Toggle product description visibility */
+function toggleDescription(productId) {
+  // Get the description element for this product
+  const descriptionElement = document.getElementById(
+    `description-${productId}`
+  );
+  const toggleButton = document.querySelector(
+    `[data-product-id="${productId}"] .toggle-description-btn`
+  );
+  const productCard = document.querySelector(
+    `[data-product-id="${productId}"]`
+  );
+
+  if (!descriptionElement || !toggleButton || !productCard) return;
+
+  // Check if description is currently visible
+  const isVisible = descriptionElement.style.display !== "none";
+
+  if (isVisible) {
+    // Hide description
+    descriptionElement.style.display = "none";
+    toggleButton.innerHTML = '<i class="fa-solid fa-info"></i>';
+    toggleButton.title = "Show description";
+    productCard.classList.remove("expanded");
+  } else {
+    // Show description
+    descriptionElement.style.display = "block";
+    toggleButton.innerHTML = '<i class="fa-solid fa-info-circle"></i>';
+    toggleButton.title = "Hide description";
+    productCard.classList.add("expanded");
+  }
 }
 
 /* Add product to selected products when plus button is clicked */
