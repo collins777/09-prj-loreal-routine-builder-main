@@ -507,6 +507,7 @@ body {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2; /* Limit to 2 lines */
+  line-clamp: 2; /* Standard property for compatibility */
   -webkit-box-orient: vertical;
 }
 
@@ -544,7 +545,6 @@ body {
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   outline: none;
-  tabindex: -1;
 }
 
 .modal-close {
