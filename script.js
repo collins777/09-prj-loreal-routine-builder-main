@@ -6,6 +6,8 @@ const chatWindow = document.getElementById("chatWindow");
 const selectedProductsList = document.getElementById("selectedProductsList");
 const generateRoutineBtn = document.getElementById("generateRoutine");
 
+const workerUrl = "https://loreal-chatbot.collinsb1793.workers.dev/";
+
 /* Array to store selected products */
 let selectedProducts = [];
 
@@ -372,11 +374,11 @@ Provide personalized advice about routines, products, skincare, haircare, makeup
     });
 
     // Make API call to OpenAI
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(workerUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
+        // Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -573,13 +575,14 @@ Please provide:
 5. Expected benefits relevant to their goals
 
 Address the user by name if known, and reference their specific concerns and preferences mentioned in our conversation.`;
+    // https://api.openai.com/v1/chat/completions
 
     // Make API call to OpenAI
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(workerUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
+        // Authorization: `Bearer ${OPENAI_API_KEY}`, // From secrets.js
       },
       body: JSON.stringify({
         model: "gpt-4o",
